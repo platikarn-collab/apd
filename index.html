@@ -1,0 +1,629 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>สมุดล้างไต APD</title>
+<meta name="theme-color" content="#6b3fa0">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#f6f4fa; --card:#fff; --ink:#221d2e; --mute:#6f6880; --line:#e6e1ee;
+  --pri:#6b3fa0; --pri-2:#8a5cc2; --pri-soft:#efe8f8;
+  --ok:#1f8a5b; --ok-soft:#e5f5ec; --warn:#b26a00; --warn-soft:#fff3dc;
+  --bad:#c0392b; --bad-soft:#fdeaea; --r:14px;
+}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--ink);font-family:"Noto Sans Thai",system-ui,sans-serif;font-size:16px;line-height:1.45}
+button,input,select,textarea{font:inherit;color:inherit}
+.wrap{max-width:720px;margin:0 auto;padding:0 14px 96px}
+header.top{background:linear-gradient(135deg,var(--pri),var(--pri-2));color:#fff;padding:16px 16px 18px;border-radius:0 0 22px 22px;margin-bottom:14px}
+.top .row{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;max-width:690px;margin:0 auto}
+.top h1{font-size:18px;margin:0;font-weight:600}
+.top .sub{opacity:.85;font-size:14px}
+.pill{font-size:12px;padding:3px 9px;border-radius:99px;background:rgba(255,255,255,.18);white-space:nowrap}
+.pill.off{background:#ffd9a8;color:#5a3600}
+.card{background:var(--card);border-radius:var(--r);padding:14px;margin-bottom:12px;box-shadow:0 1px 2px rgba(40,20,70,.06);border:1px solid var(--line)}
+.card h2{font-size:16px;margin:0 0 10px;font-weight:600;display:flex;align-items:center;justify-content:space-between;gap:8px}
+.card h2 small{font-weight:400;color:var(--mute);font-size:13px}
+.datebar{display:flex;align-items:center;gap:8px}
+.datebar input{flex:1;text-align:center;font-weight:600}
+.iconbtn{width:42px;height:42px;border-radius:12px;border:1px solid var(--line);background:#fff;font-size:18px;cursor:pointer}
+.datelabel{text-align:center;color:var(--mute);font-size:14px;margin-top:6px}
+.badge{display:inline-block;font-size:12px;padding:2px 8px;border-radius:99px;background:var(--pri-soft);color:var(--pri);font-weight:500}
+.badge.edit{background:var(--warn-soft);color:var(--warn)}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.grid.three{grid-template-columns:1fr 1fr 1fr}
+.f label{display:block;font-size:13px;color:var(--mute);margin-bottom:3px}
+.f label b{color:var(--ink);font-weight:500}
+.f input,.f select,.f textarea{width:100%;padding:10px 11px;border:1px solid var(--line);border-radius:10px;background:#fcfbfe;outline:none}
+.f input:focus,.f textarea:focus{border-color:var(--pri-2);background:#fff;box-shadow:0 0 0 3px var(--pri-soft)}
+.f .u{font-size:12px;color:var(--mute)}
+.f.full{grid-column:1/-1}
+.inwrap{position:relative}
+.inwrap .unit{position:absolute;right:10px;top:50%;transform:translateY(-50%);font-size:13px;color:var(--mute);pointer-events:none}
+.inwrap input{padding-right:40px}
+details.card>summary{list-style:none;cursor:pointer;font-weight:600;display:flex;justify-content:space-between;align-items:center}
+details.card>summary::-webkit-details-marker{display:none}
+details.card>summary::after{content:"▾";color:var(--mute);transition:transform .2s}
+details.card[open]>summary::after{transform:rotate(180deg)}
+details.card[open]>summary{margin-bottom:10px}
+.presum{font-size:13px;color:var(--mute);font-weight:400;margin-top:2px}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{padding:8px 14px;border-radius:99px;border:1px solid var(--line);background:#fff;cursor:pointer;font-size:15px}
+.chip.on{background:var(--pri);border-color:var(--pri);color:#fff}
+.chip.on.bad{background:var(--bad);border-color:var(--bad)}
+.chip.on.warn{background:var(--warn);border-color:var(--warn)}
+.ufbox{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:4px}
+.ufbox div{background:var(--pri-soft);border-radius:10px;padding:8px;text-align:center}
+.ufbox .k{font-size:12px;color:var(--mute)}
+.ufbox .v{font-size:18px;font-weight:600}
+.total{margin-top:8px;background:var(--pri);color:#fff;border-radius:12px;padding:10px 14px;display:flex;justify-content:space-between;align-items:center}
+.total .v{font-size:24px;font-weight:700}
+.alert{border-radius:12px;padding:12px 14px;margin-bottom:12px;font-size:15px}
+.alert.bad{background:var(--bad-soft);color:#7c1f16;border:1px solid #f3c1bb}
+.alert.warn{background:var(--warn-soft);color:#5e3a00;border:1px solid #f2d79c}
+.alert.info{background:var(--pri-soft);color:#3d2363}
+.alert b{display:block;margin-bottom:3px}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:12px 16px;border-radius:12px;border:1px solid var(--line);background:#fff;cursor:pointer;font-weight:500}
+.btn.pri{background:var(--pri);color:#fff;border-color:var(--pri)}
+.btn.bad{color:var(--bad);border-color:#f0c7c2}
+.btn.block{width:100%}
+.btn:disabled{opacity:.55;cursor:default}
+.actions{display:flex;gap:10px;margin-top:4px}
+.actions .btn.pri{flex:1}
+nav.bottom{position:fixed;left:0;right:0;bottom:0;background:#fff;border-top:1px solid var(--line);display:flex;justify-content:center;z-index:20;padding-bottom:env(safe-area-inset-bottom)}
+nav.bottom .in{display:flex;max-width:720px;width:100%}
+nav.bottom button{flex:1;border:0;background:none;padding:9px 4px 10px;cursor:pointer;color:var(--mute);font-size:12px;display:flex;flex-direction:column;align-items:center;gap:2px}
+nav.bottom button .ic{font-size:20px;line-height:1}
+nav.bottom button.on{color:var(--pri);font-weight:600}
+.view{display:none}.view.on{display:block}
+.entry{display:flex;gap:12px;align-items:center;padding:10px 0;border-bottom:1px solid var(--line);cursor:pointer}
+.entry:last-child{border-bottom:0}
+.entry .d{width:58px;text-align:center;flex:none}
+.entry .d .dd{font-size:22px;font-weight:700;line-height:1}
+.entry .d .mm{font-size:12px;color:var(--mute)}
+.entry .m{flex:1;min-width:0}
+.entry .m .l1{font-weight:500}
+.entry .m .l2{font-size:13px;color:var(--mute);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.entry .uf{text-align:right;flex:none}
+.entry .uf .v{font-size:18px;font-weight:700;color:var(--pri)}
+.entry .uf .k{font-size:11px;color:var(--mute)}
+.dot{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:4px;background:var(--ok)}
+.dot.bad{background:var(--bad)}.dot.warn{background:var(--warn)}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:12px}
+.stat{background:#fff;border:1px solid var(--line);border-radius:12px;padding:10px;text-align:center}
+.stat .k{font-size:12px;color:var(--mute)}
+.stat .v{font-size:20px;font-weight:700}
+.tablewrap{overflow-x:auto;-webkit-overflow-scrolling:touch;border:1px solid var(--line);border-radius:10px}
+table.book{border-collapse:collapse;font-size:13px;min-width:100%}
+table.book th,table.book td{border:1px solid var(--line);padding:6px 8px;text-align:center;white-space:nowrap}
+table.book th:first-child,table.book td:first-child{position:sticky;left:0;background:#faf8fd;text-align:left;font-weight:500;z-index:1}
+table.book thead th{background:var(--pri-soft);color:var(--pri)}
+table.book thead th:first-child{background:var(--pri-soft)}
+table.book tr.hl td{background:#f4eefb;font-weight:600}
+table.book tr.hl td:first-child{background:#ebe1f7}
+table.book td.badc{color:var(--bad);font-weight:600}
+table.book .en{display:block;font-size:10px;color:var(--mute);font-weight:400}
+.seg{display:flex;background:var(--pri-soft);border-radius:10px;padding:3px;gap:3px}
+.seg button{flex:1;border:0;background:none;padding:6px 8px;border-radius:8px;cursor:pointer;font-size:14px;color:var(--pri)}
+.seg button.on{background:#fff;font-weight:600;box-shadow:0 1px 2px rgba(0,0,0,.08)}
+.chart svg{width:100%;height:auto;display:block}
+.chart .leg{font-size:12px;color:var(--mute);display:flex;gap:12px;margin-top:4px;flex-wrap:wrap}
+.chart .leg i{display:inline-block;width:12px;height:3px;border-radius:2px;vertical-align:middle;margin-right:4px}
+.empty{color:var(--mute);text-align:center;padding:22px 8px;font-size:14px}
+.phone{display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--line)}
+.phone:last-child{border-bottom:0}
+.phone .n{font-size:13px;color:var(--mute)}
+.phone .t{font-size:18px;font-weight:600;letter-spacing:.3px}
+.phone a{color:var(--pri);text-decoration:none}
+.toast{position:fixed;left:50%;bottom:84px;transform:translateX(-50%) translateY(20px);background:#2b2238;color:#fff;padding:10px 16px;border-radius:12px;font-size:14px;opacity:0;transition:.25s;z-index:50;pointer-events:none;max-width:90vw;text-align:center}
+.toast.on{opacity:1;transform:translateX(-50%) translateY(0)}
+.modal{position:fixed;inset:0;background:rgba(20,10,35,.45);display:none;align-items:flex-end;justify-content:center;z-index:40}
+.modal.on{display:flex}
+.modal .box{background:#fff;border-radius:18px 18px 0 0;padding:18px;width:100%;max-width:720px;max-height:85vh;overflow:auto}
+.modal textarea{width:100%;min-height:200px;border:1px solid var(--line);border-radius:10px;padding:10px;font-size:13px}
+.muted{color:var(--mute);font-size:13px}
+.sp{height:6px}
+@media (min-width:560px){ .grid.wide4{grid-template-columns:repeat(4,1fr)} }
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="row">
+    <div>
+      <h1 id="hName">สมุดบันทึกล้างไตทางช่องท้อง</h1>
+      <div class="sub" id="hSub">ล้างไตด้วยเครื่องอัตโนมัติ (APD)</div>
+    </div>
+    <span class="pill" id="sync">📱 เก็บในเครื่อง</span>
+  </div>
+</header>
+
+<div class="wrap">
+
+<!-- ============ VIEW: RECORD ============ -->
+<section class="view on" id="v-rec">
+  <div class="card">
+    <div class="datebar">
+      <button class="iconbtn" id="dPrev" aria-label="วันก่อนหน้า">‹</button>
+      <input type="date" id="fDate" class="f">
+      <button class="iconbtn" id="dNext" aria-label="วันถัดไป">›</button>
+    </div>
+    <div class="datelabel"><span id="dLabel"></span> &nbsp;<span id="dMode" class="badge">บันทึกใหม่</span></div>
+  </div>
+
+  <div id="recAlert"></div>
+
+  <div class="card">
+    <h2>ผลการล้างไต <small>ดูจากหน้าจอเครื่อง</small></h2>
+    <div class="grid">
+      <div class="f"><label><b>เวลาเริ่ม</b> Start time</label><input type="time" data-k="startTime"></div>
+      <div class="f"><label><b>I-Drain</b> น้ำค้างท้อง</label><div class="inwrap"><input type="number" inputmode="numeric" data-k="iDrain"><span class="unit">ml</span></div></div>
+      <div class="f full"><label><b>กำไรจากเครื่อง</b> Total UF / Last UF / Current UF (กำไร 2)</label><div class="inwrap"><input type="number" inputmode="numeric" data-k="uf2" placeholder="ใส่ค่าติดลบได้ เช่น -50"><span class="unit">ml</span></div></div>
+    </div>
+    <div class="sp"></div>
+    <div class="f"><label><b>ลักษณะของน้ำยา</b> Drainage appearance</label></div>
+    <div class="chips" id="appChips"></div>
+    <div class="sp"></div>
+    <div class="ufbox">
+      <div><div class="k">กำไร 1 (รอบล้างท้อง)</div><div class="v" id="o1">–</div></div>
+      <div><div class="k">กำไร 2 (เครื่อง)</div><div class="v" id="o2">–</div></div>
+      <div><div class="k">กำไร 3 (กลางวัน)</div><div class="v" id="o3">–</div></div>
+    </div>
+    <div class="total"><span>Total UF กำไรรวม</span><span class="v" id="oT">–</span></div>
+  </div>
+
+  <div class="card">
+    <h2>สัญญาณชีพ & ปัสสาวะ</h2>
+    <div class="grid wide4">
+      <div class="f"><label><b>น้ำหนัก</b></label><div class="inwrap"><input type="number" inputmode="decimal" step="0.1" data-k="weight"><span class="unit">kg</span></div></div>
+      <div class="f"><label><b>ความดัน</b> บน</label><input type="number" inputmode="numeric" data-k="bpSys" placeholder="SYS"></div>
+      <div class="f"><label><b>ความดัน</b> ล่าง</label><input type="number" inputmode="numeric" data-k="bpDia" placeholder="DIA"></div>
+      <div class="f"><label><b>ปัสสาวะ</b></label><div class="inwrap"><input type="number" inputmode="numeric" data-k="urine"><span class="unit">ml</span></div></div>
+    </div>
+  </div>
+
+  <details class="card" id="progCard">
+    <summary><div>โปรแกรมเครื่อง <div class="presum" id="progSum"></div></div></summary>
+    <div class="grid">
+      <div class="f"><label><b>โปรแกรม</b> Therapy type</label><input list="dlType" data-k="therapyType"></div>
+      <div class="f"><label><b>ความเข้มข้น</b> Night conc.</label><input list="dlConc" data-k="nightConc"></div>
+      <div class="f"><label><b>น้ำยาทั้งหมด</b> Total vol.</label><div class="inwrap"><input type="number" inputmode="numeric" data-k="totalVol"><span class="unit">ml</span></div></div>
+      <div class="f"><label><b>ระยะเวลา</b> Therapy time</label><input data-k="therapyTime" placeholder="เช่น 10 ชม."></div>
+      <div class="f"><label><b>น้ำยาต่อรอบ</b> Fill vol.</label><div class="inwrap"><input type="number" inputmode="numeric" data-k="fillVol"><span class="unit">ml</span></div></div>
+      <div class="f"><label><b>จำนวนรอบ</b> Cycles</label><input type="number" inputmode="numeric" data-k="cycles"></div>
+      <div class="f full"><label><b>เวลาค้างท้องต่อรอบ</b> Dwell time</label><input data-k="dwellTime" placeholder="เช่น 1.02 (ชม.นาที)"></div>
+    </div>
+    <p class="muted" style="margin:10px 0 0">ค่าเหล่านี้ดึงจากวันล่าสุดมาให้อัตโนมัติ แก้เฉพาะวันที่หมอปรับโปรแกรม</p>
+  </details>
+
+  <details class="card" id="dayCard">
+    <summary><div>ค้างท้อง & รอบกลางวัน <div class="presum" id="daySum">ไม่มี</div></div></summary>
+    <div class="grid">
+      <div class="f"><label><b>Last fill conc.</b> % น้ำยาค้างท้อง</label><input list="dlConc" data-k="lastFillConc"></div>
+      <div class="f"><label><b>Last fill vol.</b> น้ำยาค้างท้อง</label><div class="inwrap"><input type="number" inputmode="numeric" data-k="lastFillVol"><span class="unit">ml</span></div></div>
+      <div class="f"><label><b>Day conc.</b> % รอบกลางวัน</label><input list="dlConc" data-k="dayConc"></div>
+      <div class="f"><label><b>Day fill vol.</b> เติมกลางวัน</label><div class="inwrap"><input type="number" inputmode="numeric" data-k="dayFillVol"><span class="unit">ml</span></div></div>
+      <div class="f full"><label><b>Day drain vol.</b> ปล่อยออกกลางวัน</label><div class="inwrap"><input type="number" inputmode="numeric" data-k="dayDrainVol"><span class="unit">ml</span></div></div>
+    </div>
+  </details>
+
+  <div class="card">
+    <div class="f"><label><b>หมายเหตุ</b> Remark</label><textarea rows="2" data-k="remark" placeholder="เช่น ปกติ / เครื่องเตือน Low drain / ปวดท้อง"></textarea></div>
+    <div class="chips" style="margin-top:8px" id="remChips"></div>
+  </div>
+
+  <div class="actions">
+    <button class="btn bad" id="bDel" style="display:none">ลบ</button>
+    <button class="btn pri" id="bSave">บันทึก</button>
+  </div>
+</section>
+
+<!-- ============ VIEW: HISTORY ============ -->
+<section class="view" id="v-his">
+  <div id="bkAlert"></div>
+  <div class="stats" id="hStats"></div>
+  <div class="card">
+    <h2>ตารางแบบสมุด <select id="bookMonth" style="border:1px solid var(--line);border-radius:8px;padding:4px 6px;font-size:14px"></select></h2>
+    <div class="tablewrap" id="bookTable"></div>
+    <p class="muted" style="margin:8px 0 0">เลื่อนซ้าย–ขวาเพื่อดูทุกวัน · แตะหัววันที่เพื่อแก้ไข</p>
+  </div>
+  <div class="card">
+    <h2>รายการล่าสุด</h2>
+    <div id="hList"></div>
+  </div>
+  <div class="grid">
+    <button class="btn" id="bShare">📋 สรุปส่ง LINE</button>
+    <button class="btn" id="bCsv">📄 คัดลอก CSV</button>
+  </div>
+</section>
+
+<!-- ============ VIEW: CHARTS ============ -->
+<section class="view" id="v-chart">
+  <div class="card">
+    <div class="seg" id="rangeSeg">
+      <button data-r="14" class="on">14 วัน</button><button data-r="30">30 วัน</button><button data-r="90">90 วัน</button><button data-r="0">ทั้งหมด</button>
+    </div>
+  </div>
+  <div class="card chart"><h2>Total UF กำไรรวม <small>ml</small></h2><div id="cUF"></div></div>
+  <div class="card chart"><h2>I-Drain <small>ml</small></h2><div id="cID"></div></div>
+  <div class="card chart"><h2>น้ำหนัก <small>kg</small></h2><div id="cW"></div></div>
+  <div class="card chart"><h2>ความดันโลหิต <small>mmHg</small></h2><div id="cBP"></div></div>
+  <div class="card chart"><h2>ปัสสาวะ <small>ml</small></h2><div id="cUr"></div></div>
+</section>
+
+<!-- ============ VIEW: PROFILE ============ -->
+<section class="view" id="v-pro">
+  <div class="card">
+    <h2>เบอร์โทรฉุกเฉิน</h2>
+    <div id="phones"></div>
+  </div>
+  <div class="card">
+    <h2>ข้อมูลผู้ป่วย</h2>
+    <div class="grid">
+      <div class="f full"><label>ชื่อผู้ป่วย</label><input data-p="name"></div>
+      <div class="f"><label>อายุ (ปี)</label><input data-p="age" inputmode="numeric"></div>
+      <div class="f"><label>โรงพยาบาล</label><input data-p="hospital"></div>
+      <div class="f"><label>HN</label><input data-p="hn"></div>
+      <div class="f"><label>Serial No. เครื่อง</label><input data-p="serial"></div>
+      <div class="f"><label>วันที่วางสายท่อล้างไต</label><input type="date" data-p="catheterDate"></div>
+      <div class="f"><label>วันที่เริ่มล้างไตทางช่องท้อง</label><input type="date" data-p="pdStart"></div>
+      <div class="f full"><label>วันที่เริ่มล้างไตด้วยเครื่องอัตโนมัติ</label><input type="date" data-p="apdStart"></div>
+      <div class="f full"><label>Patient activation code (RPM)</label><input data-p="rpm"></div>
+      <div class="f"><label>โทร หน่วยไตเทียม</label><input data-p="telUnit" inputmode="tel"></div>
+      <div class="f"><label>โทร พยาบาล</label><input data-p="telNurse" inputmode="tel"></div>
+      <div class="f"><label>โทร ผู้แทนยา</label><input data-p="telRep" inputmode="tel"></div>
+      <div class="f"><label>สายด่วน PD 24 ชม.</label><input data-p="telHotline" inputmode="tel"></div>
+      <div class="f full"><label>บันทึกเพิ่มเติม (ยาประจำ, แพ้ยา, นัดหมอ)</label><textarea rows="3" data-p="notes"></textarea></div>
+    </div>
+    <div class="sp"></div>
+    <button class="btn pri block" id="bPro">บันทึกข้อมูลผู้ป่วย</button>
+  </div>
+  <div class="card">
+    <h2>สำรองข้อมูล <small id="lastBk"></small></h2>
+    <p class="muted" style="margin:0 0 10px">ข้อมูลเก็บอยู่ในโทรศัพท์เครื่องนี้เท่านั้น ไม่ต้องใช้เน็ต ควรกด “ดาวน์โหลดไฟล์สำรอง” สัปดาห์ละครั้ง แล้วส่งไฟล์เก็บไว้ใน LINE (Keep) หรือ Google Drive กันเครื่องหาย/ล้างเครื่อง</p>
+    <div class="grid">
+      <button class="btn pri" id="bExport">⬇️ ดาวน์โหลดไฟล์สำรอง</button>
+      <button class="btn" id="bImport">⬆️ นำเข้าไฟล์สำรอง</button>
+    </div>
+    <input type="file" id="fImport" accept=".json,application/json" style="display:none">
+  </div>
+  <p class="muted" style="text-align:center">JOE · สมุดล้างไต APD v1.0 · ใช้งานได้แม้ไม่มีอินเทอร์เน็ต</p>
+</section>
+
+</div>
+
+<nav class="bottom"><div class="in">
+  <button data-v="rec" class="on"><span class="ic">✏️</span>บันทึก</button>
+  <button data-v="his"><span class="ic">📒</span>ประวัติ</button>
+  <button data-v="chart"><span class="ic">📈</span>กราฟ</button>
+  <button data-v="pro"><span class="ic">👧</span>ข้อมูล</button>
+</div></nav>
+
+<datalist id="dlType"><option>CCPD</option><option>NIPD</option><option>TPD</option><option>IPD</option></datalist>
+<datalist id="dlConc"><option>1.5%</option><option>2.5%</option><option>4.25%</option><option>7.5% (Extraneal)</option></datalist>
+
+<div class="toast" id="toast"></div>
+<div class="modal" id="modal"><div class="box">
+  <h2 id="mTitle" style="margin:0 0 8px;font-size:17px"></h2>
+  <div id="mBody"></div>
+  <div class="actions" style="margin-top:12px" id="mActs"></div>
+</div></div>
+
+<script>
+(function(){
+"use strict";
+const TH_M=["ม.ค.","ก.พ.","มี.ค.","เม.ย.","พ.ค.","มิ.ย.","ก.ค.","ส.ค.","ก.ย.","ต.ค.","พ.ย.","ธ.ค."];
+const TH_MF=["มกราคม","กุมภาพันธ์","มีนาคม","เมษายน","พฤษภาคม","มิถุนายน","กรกฎาคม","สิงหาคม","กันยายน","ตุลาคม","พฤศจิกายน","ธันวาคม"];
+const TH_D=["อาทิตย์","จันทร์","อังคาร","พุธ","พฤหัสบดี","ศุกร์","เสาร์"];
+const APPEAR=[{v:"ใส",c:""},{v:"ขุ่น",c:"bad"},{v:"มีเลือดปน",c:"warn"},{v:"มีเส้นใย/ไฟบริน",c:"warn"},{v:"สีอื่นๆ",c:"warn"}];
+const REMARKS=["ปกติ","เครื่องเตือน","ปวดท้อง","มีไข้","ท้องผูก","แผลสายแดง/ซึม"];
+const PROG=["therapyType","nightConc","totalVol","therapyTime","fillVol","cycles","dwellTime","lastFillConc","lastFillVol","dayConc","dayFillVol","dayDrainVol"];
+const NUM=new Set(["weight","bpSys","bpDia","totalVol","fillVol","cycles","lastFillVol","dayFillVol","dayDrainVol","iDrain","uf2","urine"]);
+const BOOK=[
+ ["weight","น้ำหนักตัว","WEIGHT"],["bp","ความดันโลหิต","BLOOD PRESSURE"],["startTime","เวลาเริ่มการรักษา","START TIME"],
+ ["nightConc","% ความเข้มข้นของน้ำยา","NIGHT CONCENTRATION"],["therapyType","โปรแกรมการรักษา","THERAPY TYPE"],
+ ["totalVol","ปริมาตรน้ำยาทั้งหมด","TOTAL VOLUME"],["therapyTime","ระยะเวลาการรักษา","THERAPY TIME"],
+ ["fillVol","ปริมาตรน้ำยาแต่ละรอบ","FILL VOLUME"],["cycles","จำนวนรอบ","NO. OF CYCLE"],["dwellTime","เวลาค้างท้องแต่ละรอบ","DWELL TIME"],
+ ["lastFillConc","% น้ำยาเติมค้างท้อง","LAST FILL CONC."],["lastFillVol","ปริมาตรน้ำยาค้างท้อง","LAST FILL VOLUME"],
+ ["dayConc","% น้ำยารอบกลางวัน","DAY CONC."],["dayFillVol","น้ำยาเติมรอบกลางวัน","DAY FILL VOLUME"],["dayDrainVol","น้ำยาปล่อยออกรอบกลางวัน","DAY DRAIN VOLUME"],
+ ["iDrain","น้ำค้างท้องที่ปล่อยออก","I-DRAIN VOLUME"],["_uf1","กำไร 1 (รอบล้างท้อง)","I-DRAIN − LAST FILL",1],["uf2","กำไร 2 (จากเครื่อง)","TOTAL/LAST/CURRENT UF",1],
+ ["_uf3","กำไร 3 (รอบกลางวัน)","DAY DRAIN − DAY FILL",1],["_ufT","ผลรวมกำไรทั้งหมด","TOTAL UF",1],
+ ["appearance","ลักษณะของน้ำยา","DRAINAGE APPEARANCE"],["urine","ปริมาตรปัสสาวะ","URINE OUTPUT"],["remark","หมายเหตุ","REMARK"]
+];
+
+let mode="local", entries={}, profile={}, curDate=todayISO(), dirty=false, range=14, bookMonth=null, bookPicked=false;
+const $=s=>document.querySelector(s), $$=s=>Array.from(document.querySelectorAll(s));
+
+function todayISO(){const d=new Date();return iso(d)}
+function iso(d){return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0")}
+function pd(s){const [y,m,d]=s.split("-").map(Number);return new Date(y,m-1,d)}
+function thShort(s){const d=pd(s);return d.getDate()+" "+TH_M[d.getMonth()]+" "+String((d.getFullYear()+543)%100).padStart(2,"0")}
+function thLong(s){const d=pd(s);return "วัน"+TH_D[d.getDay()]+"ที่ "+d.getDate()+" "+TH_MF[d.getMonth()]+" "+(d.getFullYear()+543)}
+function addDays(s,n){const d=pd(s);d.setDate(d.getDate()+n);return iso(d)}
+function isN(v){return v!==""&&v!==null&&v!==undefined&&!isNaN(Number(v))}
+function esc(s){return String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
+function fmt(n){return isN(n)?(Number(n)>0?"+":"")+Number(n).toLocaleString("th-TH"):"–"}
+function calc(e){
+  const uf1=isN(e.iDrain)&&isN(e.lastFillVol)&&Number(e.lastFillVol)>0?Number(e.iDrain)-Number(e.lastFillVol):null;
+  const uf2=isN(e.uf2)?Number(e.uf2):null;
+  const uf3=isN(e.dayDrainVol)&&isN(e.dayFillVol)?Number(e.dayDrainVol)-Number(e.dayFillVol):null;
+  const parts=[uf1,uf2,uf3].filter(v=>v!==null);
+  return {uf1,uf2,uf3,total:parts.length?parts.reduce((a,b)=>a+b,0):null};
+}
+function sorted(){return Object.keys(entries).sort()}
+function toast(t){const el=$("#toast");el.textContent=t;el.classList.add("on");clearTimeout(toast._t);toast._t=setTimeout(()=>el.classList.remove("on"),2200)}
+
+/* ---------- storage ---------- */
+const LS="apd_local_v1";
+function lsLoad(){try{const o=JSON.parse(localStorage.getItem(LS)||"{}");entries=o.entries||{};profile=o.profile||{}}catch(e){}}
+
+async function init(){
+  buildStatic();
+  lsLoad();
+  loadForm(curDate);
+  renderAll();
+  try{ if(navigator.storage&&navigator.storage.persist) navigator.storage.persist(); }catch(e){}
+  if("serviceWorker" in navigator){ navigator.serviceWorker.register("sw.js").catch(()=>{}); }
+}
+function lsSave(){try{localStorage.setItem(LS,JSON.stringify({entries,profile}));return true}catch(e){toast("บันทึกลงเครื่องไม่ได้ (พื้นที่เต็ม?)");return false}}
+async function putEntry(id,obj){ entries[id]=obj; if(!lsSave()) throw new Error("ls"); renderAll(); }
+async function delEntry(id){ delete entries[id]; lsSave(); renderAll(); }
+async function putProfile(obj){ profile=obj; lsSave(); renderProfile(); renderHeader(); }
+function lastBackup(){try{return localStorage.getItem(LS+"_bk")||""}catch(e){return ""}}
+function exportBackup(){
+  const data={app:"joe-apd",version:1,exportedAt:new Date().toISOString(),profile,entries};
+  const blob=new Blob([JSON.stringify(data,null,1)],{type:"application/json"});
+  const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download="apd-backup-"+todayISO()+".json";
+  document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove()},1500);
+  try{localStorage.setItem(LS+"_bk",todayISO())}catch(e){}
+  renderBackup();toast("ดาวน์โหลดไฟล์สำรองแล้ว ✓");
+}
+function importBackup(file){
+  const r=new FileReader();
+  r.onload=()=>{let o;try{o=JSON.parse(r.result)}catch(e){toast("ไฟล์ไม่ถูกต้อง");return}
+    if(!o||typeof o.entries!=="object"){toast("ไม่ใช่ไฟล์สำรองของแอพนี้");return}
+    const n=Object.keys(o.entries).length;
+    confirmBox("นำเข้าข้อมูล?",`พบบันทึก ${n} วัน${o.profile&&o.profile.name?" ของ "+o.profile.name:""} — วันที่ซ้ำจะใช้ข้อมูลจากไฟล์`,"นำเข้า",()=>{
+      Object.keys(o.entries).forEach(k=>{if(/^\d{4}-\d{2}-\d{2}$/.test(k))entries[k]=o.entries[k]});
+      if(o.profile&&typeof o.profile==="object"&&Object.keys(o.profile).length)profile=Object.assign({},profile,o.profile);
+      lsSave();dirty=false;loadForm(curDate);renderAll();toast("นำเข้า "+n+" วันแล้ว ✓");
+    });
+  };
+  r.readAsText(file);
+}
+function renderBackup(){
+  const lb=lastBackup();
+  $("#lastBk").textContent=lb?"ล่าสุด "+thShort(lb):"ยังไม่เคยสำรอง";
+  const n=Object.keys(entries).length;
+  const old=!lb||(pd(todayISO())-pd(lb))/864e5>=7;
+  $("#bkAlert").innerHTML=(n>=3&&old)?`<div class="alert info"><b>💾 ถึงเวลาสำรองข้อมูล</b>${lb?"สำรองครั้งล่าสุด "+thShort(lb):"ยังไม่เคยสำรองข้อมูล"} — ไปที่แท็บ “ข้อมูล” แล้วกดดาวน์โหลดไฟล์สำรอง</div>`:"";
+}
+/* ---------- static UI ---------- */
+function buildStatic(){
+  $("#appChips").innerHTML=APPEAR.map(a=>`<button type="button" class="chip" data-app="${esc(a.v)}" data-c="${a.c}">${esc(a.v)}</button>`).join("");
+  $("#remChips").innerHTML=REMARKS.map(r=>`<button type="button" class="chip" data-rem="${esc(r)}">+ ${esc(r)}</button>`).join("");
+  $$("#appChips .chip").forEach(b=>b.onclick=()=>{
+    const on=!b.classList.contains("on");
+    $$("#appChips .chip").forEach(x=>{x.classList.remove("on","bad","warn")});
+    if(on){b.classList.add("on");if(b.dataset.c)b.classList.add(b.dataset.c)}
+    dirty=true; refreshCalc();
+  });
+  $$("#remChips .chip").forEach(b=>b.onclick=()=>{
+    const ta=$('[data-k="remark"]');const v=ta.value.trim();
+    ta.value=v?(v+", "+b.dataset.rem):b.dataset.rem;dirty=true;
+  });
+  $$("[data-k]").forEach(el=>el.addEventListener("input",()=>{dirty=true;refreshCalc()}));
+  $("#fDate").value=curDate;
+  $("#fDate").onchange=e=>{if(e.target.value)goDate(e.target.value)};
+  $("#dPrev").onclick=()=>goDate(addDays(curDate,-1));
+  $("#dNext").onclick=()=>goDate(addDays(curDate,1));
+  $("#bSave").onclick=save;
+  $("#bDel").onclick=()=>confirmBox("ลบบันทึกวันนี้?",thLong(curDate)+" จะถูกลบถาวร","ลบ",async()=>{
+    try{await delEntry(curDate);dirty=false;loadForm(curDate);toast("ลบแล้ว")}catch(e){toast("ลบไม่สำเร็จ ลองใหม่อีกครั้ง")}
+  });
+  $$("nav.bottom button").forEach(b=>b.onclick=()=>show(b.dataset.v));
+  $$("#rangeSeg button").forEach(b=>b.onclick=()=>{$$("#rangeSeg button").forEach(x=>x.classList.remove("on"));b.classList.add("on");range=Number(b.dataset.r);renderCharts()});
+  $("#bookMonth").onchange=e=>{bookMonth=e.target.value;bookPicked=true;renderBook()};
+  $("#bPro").onclick=saveProfile;
+  $("#bShare").onclick=shareText;
+  $("#bCsv").onclick=csvText;
+  $("#modal").onclick=e=>{if(e.target.id==="modal")closeModal()};
+  $("#bExport").onclick=exportBackup;
+  $("#bImport").onclick=()=>$("#fImport").click();
+  $("#fImport").onchange=e=>{const f=e.target.files[0];if(f)importBackup(f);e.target.value=""};
+}
+function show(v){
+  $$(".view").forEach(x=>x.classList.remove("on"));$("#v-"+v).classList.add("on");
+  $$("nav.bottom button").forEach(b=>b.classList.toggle("on",b.dataset.v===v));
+  window.scrollTo(0,0);
+  if(v==="chart")renderCharts();
+}
+function goDate(d){
+  if(dirty){$("#fDate").value=curDate;confirmLeave(()=>{dirty=false;goDate(d)});return}
+  curDate=d;$("#fDate").value=d;loadForm(d);
+}
+function confirmLeave(fn){
+  confirmBox("ยังไม่ได้บันทึก","ข้อมูลที่กรอกไว้จะหายไป ต้องการเปลี่ยนวันหรือไม่?","เปลี่ยนวัน",fn);return false;
+}
+
+/* ---------- form ---------- */
+function lastBefore(d){const ks=sorted().filter(k=>k<d);return ks.length?entries[ks[ks.length-1]]:(sorted().length?entries[sorted()[sorted().length-1]]:null)}
+function loadForm(d){
+  const e=entries[d];
+  const base=e?e:{};
+  if(!e){const prev=lastBefore(d);if(prev)PROG.forEach(k=>{if(prev[k]!==undefined&&prev[k]!=="")base[k]=prev[k]})}
+  $$("[data-k]").forEach(el=>{const v=base[el.dataset.k];el.value=(v===undefined||v===null)?"":v});
+  $$("#appChips .chip").forEach(x=>{x.classList.remove("on","bad","warn");if(base.appearance===x.dataset.app){x.classList.add("on");if(x.dataset.c)x.classList.add(x.dataset.c)}});
+  dirty=false; updateMode(); refreshCalc();
+  $("#dLabel").textContent=thLong(d);
+  $("#progCard").open=false;
+  const hasDay=["lastFillVol","dayFillVol","dayDrainVol"].some(k=>isN(base[k])&&Number(base[k])>0);
+  $("#dayCard").open=false;
+  $("#dNext").disabled=false;
+}
+function updateMode(){
+  const ex=!!entries[curDate];
+  const m=$("#dMode");m.textContent=ex?"บันทึกแล้ว · แก้ไขได้":"บันทึกใหม่";m.classList.toggle("edit",ex);
+  $("#bDel").style.display=ex?"":"none";
+  $("#bSave").textContent=ex?"บันทึกการแก้ไข":"บันทึก";
+}
+function readForm(){
+  const o={date:curDate};
+  $$("[data-k]").forEach(el=>{let v=el.value.trim();if(v==="")return;o[el.dataset.k]=NUM.has(el.dataset.k)?Number(v):v});
+  const a=$("#appChips .chip.on");if(a)o.appearance=a.dataset.app;
+  return o;
+}
+function refreshCalc(){
+  const o=readForm(),c=calc(o);
+  $("#o1").textContent=fmt(c.uf1);$("#o2").textContent=fmt(c.uf2);$("#o3").textContent=fmt(c.uf3);$("#oT").textContent=fmt(c.total);
+  $("#progSum").textContent=[o.therapyType,o.nightConc,isN(o.fillVol)?o.fillVol+" ml × "+(o.cycles??"?")+" รอบ":"",o.therapyTime].filter(Boolean).join(" · ")||"ยังไม่ได้ตั้งค่า";
+  const ds=[];if(isN(o.lastFillVol)&&o.lastFillVol>0)ds.push("ค้างท้อง "+o.lastFillVol+" ml");if(isN(o.dayFillVol)&&o.dayFillVol>0)ds.push("กลางวัน "+o.dayFillVol+" ml");
+  $("#daySum").textContent=ds.join(" · ")||"ไม่มี";
+  $("#recAlert").innerHTML=alertFor(o);
+}
+function alertFor(o){
+  const tel=[profile.telUnit&&("หน่วยไตเทียม "+profile.telUnit),profile.telNurse&&("พยาบาล "+profile.telNurse),"สายด่วน PD "+(profile.telHotline||"080-785-9942")].filter(Boolean).join(" · ");
+  if(o.appearance==="ขุ่น")return `<div class="alert bad"><b>⚠️ น้ำยาขุ่น — ควรแจ้งหน่วยไตเทียมโดยเร็ว</b>น้ำยาขุ่นเป็นอาการที่ทีมรักษาให้แจ้งทันที (อาจเป็นการติดเชื้อในช่องท้อง) โดยเฉพาะถ้ามีไข้หรือปวดท้องร่วมด้วย เก็บถุงน้ำยาไว้ให้พยาบาลดู<br><small>${esc(tel)}</small></div>`;
+  if(o.appearance&&o.appearance!=="ใส")return `<div class="alert warn"><b>น้ำยา${esc(o.appearance)}</b>จดไว้และแจ้งพยาบาลประจำหน่วยไตเทียมตามที่ได้รับคำแนะนำ<br><small>${esc(tel)}</small></div>`;
+  return "";
+}
+async function save(){
+  const o=readForm();
+  const keys=Object.keys(o).filter(k=>k!=="date");
+  if(!keys.length){toast("ยังไม่ได้กรอกข้อมูล");return}
+  o.updatedAt=new Date().toISOString();
+  const b=$("#bSave");b.disabled=true;
+  try{await putEntry(curDate,o);entries[curDate]=o;dirty=false;updateMode();renderAll();toast("บันทึกแล้ว ✓")}
+  catch(e){toast(e&&e.code==="quota_exceeded"?"พื้นที่เต็ม บันทึกไม่ได้":"บันทึกไม่สำเร็จ ลองใหม่อีกครั้ง")}
+  b.disabled=false;
+}
+
+/* ---------- render ---------- */
+function renderAll(){renderBackup();renderHeader();renderHistory();renderBook();renderProfile();if($("#v-chart").classList.contains("on"))renderCharts()}
+function renderHeader(){
+  $("#hName").textContent=profile.name||"สมุดบันทึกล้างไตทางช่องท้อง";
+  $("#hSub").textContent=[profile.age&&("อายุ "+profile.age+" ปี"),profile.hospital&&("รพ."+profile.hospital.replace(/^รพ\.?/,"")),"APD"].filter(Boolean).join(" · ");
+}
+function appDot(a){return !a?"":a==="ใส"?"":a==="ขุ่น"?"bad":"warn"}
+function renderHistory(){
+  const ks=sorted().reverse();
+  const last7=ks.slice(0,7).map(k=>calc(entries[k]).total).filter(v=>v!==null);
+  const avg=last7.length?Math.round(last7.reduce((a,b)=>a+b,0)/last7.length):null;
+  const lastW=ks.map(k=>entries[k].weight).find(isN);
+  $("#hStats").innerHTML=`<div class="stat"><div class="k">บันทึกทั้งหมด</div><div class="v">${ks.length}</div></div>
+   <div class="stat"><div class="k">UF เฉลี่ย 7 ครั้ง</div><div class="v">${avg===null?"–":fmt(avg)}</div></div>
+   <div class="stat"><div class="k">น้ำหนักล่าสุด</div><div class="v">${lastW??"–"}</div></div>`;
+  if(!ks.length){$("#hList").innerHTML=`<div class="empty">ยังไม่มีบันทึก<br>เริ่มที่แท็บ “บันทึก”</div>`;return}
+  $("#hList").innerHTML=ks.slice(0,60).map(k=>{const e=entries[k],c=calc(e),d=pd(k);
+    return `<div class="entry" data-d="${k}"><div class="d"><div class="dd">${d.getDate()}</div><div class="mm">${TH_M[d.getMonth()]} ${String((d.getFullYear()+543)%100)}</div></div>
+    <div class="m"><div class="l1"><span class="dot ${appDot(e.appearance)}"></span>${esc(e.appearance||"ไม่ระบุลักษณะน้ำยา")}${e.startTime?" · เริ่ม "+esc(e.startTime):""}</div>
+    <div class="l2">${[isN(e.iDrain)?"I-Drain "+e.iDrain:"",isN(e.weight)?e.weight+" kg":"",isN(e.bpSys)?e.bpSys+"/"+(e.bpDia??"?"):"",e.remark||""].filter(Boolean).map(esc).join(" · ")||"&nbsp;"}</div></div>
+    <div class="uf"><div class="v">${fmt(c.total)}</div><div class="k">Total UF</div></div></div>`}).join("");
+  $$("#hList .entry").forEach(el=>el.onclick=()=>{show("rec");goDate(el.dataset.d)});
+}
+function renderBook(){
+  const months=[...new Set(sorted().map(k=>k.slice(0,7)))].reverse();
+  const cur=todayISO().slice(0,7);if(!months.includes(cur))months.unshift(cur);
+  if(!bookPicked||!months.includes(bookMonth))bookMonth=months.find(m=>sorted().some(k=>k.startsWith(m)))||cur;
+  $("#bookMonth").innerHTML=months.map(m=>{const [y,mm]=m.split("-").map(Number);return `<option value="${m}" ${m===bookMonth?"selected":""}>${TH_MF[mm-1]} ${y+543}</option>`}).join("");
+  const ks=sorted().filter(k=>k.startsWith(bookMonth));
+  if(!ks.length){$("#bookTable").innerHTML=`<div class="empty">ไม่มีบันทึกในเดือนนี้</div>`;return}
+  let h=`<table class="book"><thead><tr><th>DATE วัน/เดือน/ปี</th>${ks.map(k=>`<th data-d="${k}" style="cursor:pointer">${thShort(k)}</th>`).join("")}</tr></thead><tbody>`;
+  BOOK.forEach(([key,th,en,hl])=>{
+    h+=`<tr class="${hl?"hl":""}"><td>${esc(th)}<span class="en">${esc(en)}</span></td>`;
+    ks.forEach(k=>{const e=entries[k],c=calc(e);let v,cls="";
+      if(key==="bp")v=isN(e.bpSys)?e.bpSys+"/"+(e.bpDia??"-"):"";
+      else if(key==="_uf1")v=c.uf1;else if(key==="_uf3")v=c.uf3;else if(key==="_ufT")v=c.total;
+      else v=e[key];
+      if(key==="appearance"&&v&&v!=="ใส")cls="badc";
+      if(v===null||v===undefined||v==="")v="–";
+      h+=`<td class="${cls}">${esc(v)}</td>`});
+    h+="</tr>";
+  });
+  $("#bookTable").innerHTML=h+"</tbody></table>";
+  $$("#bookTable th[data-d]").forEach(th=>th.onclick=()=>{show("rec");goDate(th.dataset.d)});
+}
+
+/* ---------- charts ---------- */
+function chart(el,series,opt={}){
+  const ks0=sorted();let ks=ks0;
+  if(range>0){const from=addDays(todayISO(),-range+1);ks=ks0.filter(k=>k>=from);if(!ks.length)ks=ks0.slice(-range)}
+  const pts=series.map(s=>ks.map((k,i)=>{const v=s.get(entries[k]);return isN(v)?{i,k,v:Number(v)}:null}).filter(Boolean));
+  const all=pts.flat();
+  if(all.length<1){el.innerHTML=`<div class="empty">ยังไม่มีข้อมูลในช่วงนี้</div>`;return}
+  const W=360,H=200,pl=38,pr=10,pt=16,pb=26;
+  let mn=Math.min(...all.map(p=>p.v)),mx=Math.max(...all.map(p=>p.v));
+  if(opt.zero){mn=Math.min(0,mn);mx=Math.max(0,mx)}
+  if(mn===mx){mn-=1;mx+=1}
+  const pad=(mx-mn)*.12;mn-=pad;mx+=pad;
+  const n=Math.max(ks.length-1,1);
+  const X=i=>pl+(W-pl-pr)*(ks.length===1?.5:i/n),Y=v=>pt+(H-pt-pb)*(1-(v-mn)/(mx-mn));
+  let g="";
+  for(let t=0;t<=4;t++){const v=mn+(mx-mn)*t/4,y=Y(v);g+=`<line x1="${pl}" x2="${W-pr}" y1="${y}" y2="${y}" stroke="#ece7f3"/><text x="${pl-6}" y="${y+4}" font-size="11" text-anchor="end" fill="#8a8399">${(mx-mn)>20?Math.round(v):Math.round(v*10)/10}</text>`}
+  if(opt.zero&&mn<0&&mx>0)g+=`<line x1="${pl}" x2="${W-pr}" y1="${Y(0)}" y2="${Y(0)}" stroke="#b9b0c8" stroke-dasharray="4 3"/>`;
+  const step=Math.max(1,Math.ceil(ks.length/5));
+  ks.forEach((k,i)=>{if(i%step===0||i===ks.length-1){const d=pd(k);const an=ks.length>1&&i===ks.length-1?"end":(ks.length>1&&i===0?"start":"middle");g+=`<text x="${X(i)}" y="${H-8}" font-size="11" text-anchor="${an}" fill="#8a8399">${d.getDate()} ${TH_M[d.getMonth()]}</text>`}});
+  pts.forEach((p,si)=>{const col=series[si].color;
+    if(p.length>1)g+=`<polyline fill="none" stroke="${col}" stroke-width="2.4" stroke-linejoin="round" stroke-linecap="round" points="${p.map(q=>X(q.i)+","+Y(q.v)).join(" ")}"/>`;
+    p.forEach(q=>{g+=`<circle cx="${X(q.i)}" cy="${Y(q.v)}" r="${p.length>40?2:3.5}" fill="#fff" stroke="${col}" stroke-width="2"><title>${thShort(q.k)}: ${q.v}</title></circle>`});
+    const last=p[p.length-1];if(last)g+=`<text x="${Math.min(X(last.i),W-pr-4)}" y="${Y(last.v)-9}" font-size="12" font-weight="600" text-anchor="end" fill="${col}">${last.v}</text>`;
+  });
+  el.innerHTML=`<svg viewBox="0 0 ${W} ${H}" role="img">${g}</svg>`+(series.length>1?`<div class="leg">${series.map(s=>`<span><i style="background:${s.color}"></i>${s.name}</span>`).join("")}</div>`:"");
+}
+function renderCharts(){
+  chart($("#cUF"),[{get:e=>calc(e).total,color:"#6b3fa0"}],{zero:true});
+  chart($("#cID"),[{get:e=>e.iDrain,color:"#2e7bb8"}]);
+  chart($("#cW"),[{get:e=>e.weight,color:"#1f8a5b"}]);
+  chart($("#cBP"),[{name:"ตัวบน",get:e=>e.bpSys,color:"#c0392b"},{name:"ตัวล่าง",get:e=>e.bpDia,color:"#e08a2c"}]);
+  chart($("#cUr"),[{get:e=>e.urine,color:"#b8952e"}]);
+}
+
+/* ---------- profile ---------- */
+function renderProfile(){
+  $$("[data-p]").forEach(el=>{if(document.activeElement!==el)el.value=profile[el.dataset.p]??""});
+  const ph=[["หน่วยไตเทียม",profile.telUnit],["พยาบาล",profile.telNurse],["สายด่วน PD 24 ชม.",profile.telHotline||"080-785-9942"],["ผู้แทนยา",profile.telRep]].filter(p=>p[1]);
+  $("#phones").innerHTML=ph.map(([n,t])=>`<div class="phone"><div><div class="n">${esc(n)}</div><div class="t">${esc(t)}</div></div><a class="btn" href="tel:${esc(String(t).replace(/[^0-9+]/g,""))}">📞 โทร</a></div>`).join("");
+}
+async function saveProfile(){
+  const o={};$$("[data-p]").forEach(el=>{const v=el.value.trim();if(v)o[el.dataset.p]=v});
+  try{await putProfile(o);profile=o;renderProfile();renderHeader();toast("บันทึกข้อมูลผู้ป่วยแล้ว ✓")}catch(e){toast("บันทึกไม่สำเร็จ")}
+}
+
+/* ---------- export ---------- */
+function openModal(title,body,acts){$("#mTitle").textContent=title;$("#mBody").innerHTML=body;$("#mActs").innerHTML="";acts.forEach(a=>{const b=document.createElement("button");b.className="btn "+(a.cls||"");b.textContent=a.t;b.onclick=a.fn;$("#mActs").appendChild(b)});$("#modal").classList.add("on")}
+function closeModal(){$("#modal").classList.remove("on")}
+function confirmBox(t,msg,okText,fn){openModal(t,`<p style="margin:0">${esc(msg)}</p>`,[{t:"ยกเลิก",fn:closeModal},{t:okText,cls:"pri",fn:()=>{closeModal();fn()}}])}
+function copyBox(title,text){
+  openModal(title,`<textarea id="mText" readonly>${esc(text)}</textarea><p class="muted">กด “คัดลอก” แล้วไปวางใน LINE หรือที่อื่นได้เลย</p>`,[
+    {t:"ปิด",fn:closeModal},
+    {t:"คัดลอก",cls:"pri",fn:async()=>{const ta=$("#mText");try{await navigator.clipboard.writeText(text);toast("คัดลอกแล้ว ✓")}catch(e){ta.focus();ta.select();try{document.execCommand("copy");toast("คัดลอกแล้ว ✓")}catch(_){toast("กดค้างที่ข้อความเพื่อคัดลอก")}}}}
+  ]);
+}
+function shareText(){
+  const ks=sorted().slice(-7);
+  if(!ks.length){toast("ยังไม่มีบันทึก");return}
+  const p=profile, first=entries[ks[ks.length-1]];
+  let t=`📒 บันทึกล้างไตทางช่องท้อง (APD)\n${p.name||""}${p.hn?" HN "+p.hn:""}\n`;
+  t+=`โปรแกรม: ${[first.therapyType,first.nightConc,isN(first.fillVol)?first.fillVol+"ml×"+(first.cycles??"?"):"",first.therapyTime].filter(Boolean).join(" ")}\n\n`;
+  ks.forEach(k=>{const e=entries[k],c=calc(e);
+    t+=`${thShort(k)} | เริ่ม ${e.startTime||"-"} | I-Drain ${e.iDrain??"-"} | UF ${c.total??"-"} | ${e.appearance||"-"}`+(isN(e.weight)?` | ${e.weight}kg`:"")+(isN(e.bpSys)?` | BP ${e.bpSys}/${e.bpDia??"-"}`:"")+(e.remark?` | ${e.remark}`:"")+"\n"});
+  copyBox("สรุป 7 วันล่าสุด",t.trim());
+}
+function csvText(){
+  const cols=["date","weight","bpSys","bpDia","startTime","nightConc","therapyType","totalVol","therapyTime","fillVol","cycles","dwellTime","lastFillConc","lastFillVol","dayConc","dayFillVol","dayDrainVol","iDrain","uf1","uf2","uf3","totalUF","appearance","urine","remark"];
+  const q=v=>{v=v??"";v=String(v);return /[",\n]/.test(v)?'"'+v.replace(/"/g,'""')+'"':v};
+  let t=cols.join(",")+"\n";
+  sorted().forEach(k=>{const e=entries[k],c=calc(e),r=Object.assign({},e,{uf1:c.uf1,uf3:c.uf3,totalUF:c.total});t+=cols.map(cn=>q(r[cn])).join(",")+"\n"});
+  copyBox("CSV (เปิดใน Excel/Google Sheets ได้)",t.trim());
+}
+
+init();
+})();
+</script>
+</body>
+</html>
